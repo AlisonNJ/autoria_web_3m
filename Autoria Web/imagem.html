@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bandeira com Listras</title>
+<style>
+  body {
+    margin: 0;
+    display: flex;
+    
+    height: 100vh;
+  }
+
+  .flag {
+    width: 400px;
+    height: 250px;
+    background-color: #db4f43; /* vermelho */
+    display: flex;
+  }
+
+  .half {
+    width: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    
+  }
+
+  .stripe {
+    height: 20px;
+    background-color: #f7e26b; /* amarelo */
+  }
+
+  /* Lado esquerdo */
+  .left .stripe {
+    width: 80%;
+  }
+
+  /* Lado direito */
+  .right .stripe {
+    width: 80%;
+    align-self: flex-end;
+  }
+</style>
+</head>
+<body>
+  <div class="flag">
+    <div class="half left">
+      <div class="stripe"></div>
+      <div class="stripe"></div>
+      <div class="stripe"></div>
+    </div>
+    <div class="half right">
+      <div class="stripe"></div>
+      <div class="stripe"></div>
+      <div class="stripe"></div>
+    </div>
+  </div>
+</body>
+</html>
