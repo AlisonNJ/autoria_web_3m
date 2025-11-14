@@ -1,0 +1,32 @@
+body {
+  background: #1b1136;
+  color: #fff;
+}
+
+.card {
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #333;
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: fill;
+}
+
+h1 {
+  color: #f1f1f1;
+  font-size: 1.6rem;
+}
+
+@media (max-width: 768px) {
+  .card-img-top {
+    height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-img-top {
+    height: 100px;
+  }
+}
