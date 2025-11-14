@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Enciclopédia — One Piece / Attack on Titan / Boku no Hero</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1: #242424;
+    --bg2: #2a2a2a;
+    --card-bg: #3a3a3a;
+    --border: #555;
+    --hover-glow: rgba(200,200,200,0.25);
+  }
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background: linear-gradient(180deg, var(--bg1), var(--bg2));
+    color: #fff;
+  }
+  .title-font{
+    font-family:"Playfair Display", serif;
+    font-weight:700;
+    letter-spacing:1px;
+  }
+  .hero{
+    background: linear-gradient(#0006,#0006);
+    padding:36px 16px;
+    text-align:center;
+    border-bottom:2px solid rgba(255,255,255,0.07);
+  }
+  .controls{
+    margin-top:18px;
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .anime-select{
+    min-width:220px;
+    background:#3a3a3a;
+    border:1px solid var(--border);
+    color:#fff;
+  }
+  .anime-select:focus{
+    border-color:#888;
+    box-shadow:0 0 0 3px rgba(180,180,180,0.35);
+  }
+  .input-group-text{
+    background:#3a3a3a;
+    border:1px solid var(--border);
+    color:#fff;
+  }
+  .form-control{
+    background:#303030;
+    border:1px solid var(--border);
+    color:#fff;
+  }
+  .form-control:focus{
+    background:#303030;
+    border-color:#888;
+    box-shadow:0 0 0 3px rgba(180,180,180,0.35);
+  }
+  #countLabel{
+    min-width:120px;
+    text-align:center;
+    font-size:.9rem;
+    color:#dbdbdb;
+  }
+  .card{
+    background: var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+    cursor:pointer;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .card-img-top{
+    height:180px;
+    object-fit:cover;
+    width:100%;
+    transition: transform .28s ease;
+  }
+  .card:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px var(--hover-glow);
+    border-color:#aaa;
+  }
+  .card:hover .card-img-top{
+    transform: scale(1.06) rotate(-1deg);
+    filter: brightness(1.05);
+  }
+  .card-body{
+    padding:12px;
+  }
+  .card-title{
+    font-size:1rem;
+    margin-bottom:6px;
+    color:#fff;
+  }
+  .card-text{
+    font-size:.85rem;
+    color:#d0d0d0;
+    margin:0;
+  }
+  .modal-content{
+    background:#f3f3f3;
+    color:#000;
+    border-radius:10px;
+  }
+  .modal-body p{
+    margin-bottom:.7rem;
+  }
+  .search-highlight{
+    background: rgba(191,191,191,0.12);
+    padding:6px 8px;
+    border-radius:8px;
+    display:inline-block;
+    margin-top:8px;
+  }
+  @media(max-width:768px){
+    .card-img-top{ height:130px; }
+    .controls{ gap:8px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1 class="display-6 title-font">Enciclopédia de Personagens</h1>
+  <p class="lead" style="color:#dcdcdc;">Escolha o anime, pesquise e clique no card para ver detalhes.</p>
+  <div class="container mt-2">
+    <div class="controls">
+      <select id="animeSelect" class="form-select anime-select" aria-label="Selecionar anime">
+        <option value="onepiece" selected>One Piece</option>
+        <option value="aot">Attack on Titan</option>
+        <option value="bnha">Boku no Hero</option>
+      </select>
+      <div style="min-width:300px; flex:1; max-width:620px;">
+        <div class="input-group">
+          <span class="input-group-text">🔎</span>
+          <input id="searchInput" class="form-control" placeholder="Pesquisar personagem ou função...">
+          <button id="clearBtn" class="btn btn-outline-light">Limpar</button>
+        </div>
+      </div>
+      <div id="countLabel">-- / --</div>
+    </div>
+  </div>
+</header>
+
+<main class="container my-5">
+  <div id="cardsGrid" class="row g-3"></div>
+</main>
+
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title title-font" id="modalTitle"></h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-5">
+            <img id="modalImg" class="img-fluid rounded" alt="">
+          </div>
+          <div class="col-md-7">
+            <h3 id="modalName"></h3>
+            <p class="text-muted" id="modalRole"></p>
+            <p><strong id="attrLabel1"></strong> <span id="attrValue1"></span></p>
+            <p><strong id="attrLabel2"></strong> <span id="attrValue2"></span></p>
+            <hr>
+            <h6>Biografia</h6>
+            <p id="modalBio" style="white-space:pre-wrap;"></p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const onepiece = [
+  { name: "Monkey D. Luffy", role: "Capitão (Straw Hat)", bounty: "3,000,000,000", status: "Pirata / Yonkou", img: "Imagens/luffy.jpg", bio: `Monkey D. Luffy é um jovem pirata movido por um sonho inabalável: tornar-se o Rei dos Piratas. Desde a infância, Luffy demonstrou um espírito aventureiro e uma vontade de ferro, protegendo amigos e enfrentando tiranos sem hesitar. Após comer a Fruta do Diabo que lhe conferiu corpo elástico, ele transformou sua maneira de lutar e sua visão de liberdade, liderando sua tripulação com lealdade incondicional. Ao longo da jornada, Luffy não apenas cresce em força, mas também em compreensão do peso de suas ações, inspirando aliados e forjando um legado que desafia os poderosos do mundo.` },
+  { name: "Roronoa Zoro", role: "Espadachim (Straw Hat)", bounty: "1,111,000,000", status: "Pirata / Ex-capitão de vilarejo (histórico)", img: "Imagens/zoro.jpg", bio: `Roronoa Zoro é um espadachim incansável cuja ambição é tornar-se o maior espadachim do mundo. Treinado com disciplina e sofrimento, Zoro transformou dor em força e desenvolveu técnicas que desafiam os limites humanos. Sua dedicação ao caminho da espada é complementada por um senso inabalável de honra e lealdade para com seus companheiros de tripulação. Mesmo quando enfrenta feridas e desafios esmagadores, Zoro mantém a compostura fria e a determinação que o tornam um pilar tático em batalhas.` },
+  { name: "Nami", role: "Navegadora / Cartógrafa", bounty: "366,000,000", status: "Pirata / Especialista em navegação", img: "Imagens/nami.jpg", bio: `Nami é uma navegadora brilhante cujo talento para cartografia e controle meteorológico a torna indispensável em qualquer tripulação que deseje conquistar os mares. Sua inteligência prática e senso de economia contrasta com sua coragem em situações de combate e exploração.` },
+  { name: "Usopp", role: "Atirador / Inventor", bounty: "500,000,000", status: "Pirata / Sniper", img: "Imagens/usopp.jpg", bio: `Usopp começou como um contador de histórias e evoluiu para um atirador e inventor de grande engenhosidade. Sua habilidade de adaptação e inventividade transformaram-no em um combatente singular.` },
+  { name: "Sanji", role: "Cozinheiro / Lutador", bounty: "1,032,000,000", status: "Pirata / Chefe de cozinha", img: "Imagens/sanji.jpg", bio: `Sanji é um mestre da culinária e das artes marciais, conhecido tanto por suas receitas quanto por seus poderosos chutes de combate.` },
+  { name: "Tony Tony Chopper", role: "Médico", bounty: "1,000", status: "Pirata / Médico", img: "Imagens/chopper.jpg", bio: `Tony Tony Chopper é um médico renascentista que possui um intelecto e habilidades médicas profundas. Como usuário de uma Fruta do Diabo que lhe permite transformar seu corpo, Chopper aplica conhecimentos de biologia e medicina para tratar ferimentos.` },
+  { name: "Nico Robin", role: "Arqueóloga", bounty: "930,000,000", status: "Pirata / Arqueóloga", img: "Imagens/nico robin.jpg", bio: `Nico Robin é uma arqueóloga enigmática cuja busca pelo saber e compreensão do passado a coloca no centro de conspirações históricas.` },
+  { name: "Franky", role: "Ciborgue / Engenheiro", bounty: "394,000,000", status: "Pirata / Carpinteiro", img: "Imagens/franky.jpg", bio: `Franky é um engenheiro brilhante que transformou seu próprio corpo em um arsenal mecânico para construir navios e armas.` },
+  { name: "Brook", role: "Músico / Espadachim", bounty: "383,000,000", status: "Pirata / Músico", img: "Imagens/brook.jpg", bio: `Brook é um músico-espadachim de personalidade excêntrica que traz humor e leveza, mas também possui um passado trágico que fortaleceu sua determinação.` },
+  { name: "Jinbe", role: "Timonel / Lutador", bounty: "1,100,000,000", status: "Pirata / Ex-Shichibukai", img: "Imagens/jimbe.jpg", bio: `Jinbe é um homem do mar com um passado de honra e diplomacia, que combina força física e experiência política.` },
+  { name: "Trafalgar D. Water Law", role: "Capitão / Médico cirúrgico", bounty: "3,000,000,000", status: "Pirata / Supernova", img: "Imagens/law.jpg", bio: `Trafalgar Law é um médico e estrategista frio e calculista, cujo passado traumático moldou seu desejo por justiça e controle.` },
+  { name: "Shanks", role: "Yonkou / Líder", bounty: "4,048,900,000", status: "Yonkou / Ex-Ajudante de Roger", img: "Imagens/shanks.jpg", bio: `Shanks é um pirata enigmático que personifica influência e carisma, capaz de deter conflitos apenas com presença e reputação.` }
+];
+
+const aot = [
+  { name: "Eren Yeager", role: "Titã / Protagonista", nation: "Eldiano", img: "Imagens/eren yeager.jpg", bio: `Eren Yeager é uma figura complexa cuja jornada transforma profundamente o destino do mundo. Movido inicialmente por ódio aos titãs, Eren expande sua visão até abraçar medidas extremas em nome da liberdade do seu povo.`, role_desc: "Titã Fundador / Personagem central" },
+  { name: "Mikasa Ackerman", role: "Soldado de elite", nation: "Eldiana", img: "Imagens/mikasa.jpg", bio: `Mikasa é uma combatente inigualável, cujo talento nato e lealdade quase absoluta a Eren a definem como uma das figuras mais temidas e respeitadas nas linhas de defesa da humanidade.`, role_desc: "Soldado de elite / Titã (em certas fases)" },
+  { name: "Armin Arlert", role: "Estratégia / Titã Colossal", nation: "Eldiana", img: "Imagens/armin.jpg", bio: `Armin é um pensador brilhante cuja força reside na inteligência tática e na capacidade de elaborar planos coerentes sob pressão.`, role_desc: "Titã Colossal / Estrategista" },
+  { name: "Levi Ackerman", role: "Capitão de Esquadrão", nation: "Eldiana", img: "Imagens/levi.jpg", bio: `Levi Ackerman é reconhecido como o soldado mais forte da humanidade, uma figura moldada pela dura vida nas ruas e por perdas que forjaram um senso de disciplina inabalável.`, role_desc: "Soldado de elite / Executor tático" },
+  { name: "Hange Zoe", role: "Chefe / Ciência", nation: "Eldiana", img: "Imagens/hange.jpg", bio: `Hange é movida por curiosidade científica e pela obsessão por compreender os titãs. Sua abordagem combina brilhantismo e entusiasmo.`, role_desc: "Líder científica / Exploradora" },
+  { name: "Reiner Braun", role: "Guerreiro / Titã Blindado", nation: "Marleyano", img: "Imagens/reiner.jpg", bio: `Reiner é um personagem dividido entre o dever de um guerreiro e o peso das memórias pessoais.`, role_desc: "Titã Blindado / Guerreiro" },
+  { name: "Annie Leonhart", role: "Guerreiro / Titã Fêmea", nation: "Marleyano", img: "Imagens/annie.jpg", bio: `Annie é uma guerreira reservada e letal, cuja habilidade técnica e controle emocional a tornam um oponente formidável.`, role_desc: "Titã Fêmea / Infiltradora" },
+  { name: "Zeke Yeager", role: "Titã Bestial / Estrategista", nation: "Marleyano (origem eldiana)", img: "Imagens/zeke.jpg", bio: `Zeke Yeager é um estrategista calculista cujo papel nas tramas envolve manipulação e objetivos ideológicos complexos.`, role_desc: "Titã Bestial / Conspirador" },
+  { name: "Pieck Finger", role: "Titã Carroça / Suporte tático", nation: "Marleyano", img: "Imagens/pieck.jpg", bio: `Pieck é uma figura que combina inteligência e utilidade em batalha, usando sua forma titânica especializada para transporte e apoio logístico.`, role_desc: "Titã de suporte / Logística" },
+  { name: "Porco Galliard", role: "Titã Mandíbula", nation: "Eldiano", img: "Imagens/galliard.jpg", bio: `Porco Galliard é carismático e feroz em combate, conhecido por habilidades de ataque devastadoras derivadas de sua forma de Titã Mandíbula.`, role_desc: "Titã Mandíbula / Guerreiro" },
+  { name: "Ymir", role: "Titã / Figura histórica", nation: "Eldiana", img: "Imagens/ymir.jpg", bio: `Ymir é envolta em mitos e memórias que ligam as origens dos titãs à história do mundo.`, role_desc: "Titã primitivo / Mito fundador" }
+];
+
+const bnha = [
+  { name: "Izuku Midoriya (Deku)", role: "Herói Estudante", class: "Estudante / Herói Aspirante", quirk: "One For All", img: "Imagens/midoriya.jpg", bio: `Izuku Midoriya, conhecido como Deku, é a personificação da perseverança e do heroísmo idealista.` },
+  { name: "Katsuki Bakugo", role: "Herói Estudante", class: "Estudante / Herói Aspirante", quirk: "Explosion", img: "Imagens/bakugo.jpg", bio: `Katsuki Bakugo é um indivíduo explosivo em personalidade e poder, cuja ambição e confiança o impulsionam a buscar a glória heroica.` },
+  { name: "Ochaco Uraraka", role: "Heroína Estudante", class: "Estudante / Heróina Aspirante", quirk: "Zero Gravity", img: "Imagens/uraraka.jpg", bio: `Ochaco Uraraka é movida por altruísmo e simpatia, aspirando tornar-se herói não por glória, mas para garantir estabilidade financeira à família e ajudar os outros.` },
+  { name: "Shoto Todoroki", role: "Herói Estudante", class: "Estudante / Herói Aspirante", quirk: "Half-Cold Half-Hot", img: "Imagens/todoroki.jpg", bio: `Shoto Todoroki carrega o peso de uma herança familiar turbulenta, combinando poderes de gelo e fogo.` },
+  { name: "All Might (Toshinori Yagi)", role: "Herói (aposentado)", class: "Herói Profissional / Mentor", quirk: "One For All (ex-portador)", img: "Imagens/all might.jpg", bio: `All Might é o símbolo da paz cuja presença moldou gerações de heróis.` },
+  { name: "Tenya Iida", role: "Herói Estudante", class: "Estudante / Herói", quirk: "Engine", img: "Imagens/lida.jpg", bio: `Tenya Iida é sinônimo de disciplina, responsabilidade e velocidade tática.` },
+  { name: "Momo Yaoyorozu", role: "Heroína Estudante", class: "Estudante / Heróina Criadora", quirk: "Creation", img: "Imagens/yaoyorozu.jpg", bio: `Momo é prodígio intelectual cuja habilidade de criar objetos a torna excepcionalmente versátil em campo.` },
+  { name: "Eijiro Kirishima", role: "Herói Estudante", class: "Estudante / Herói", quirk: "Hardening", img: "Imagens/kirishima.jpg", bio: `Kirishima é a personificação de coragem bruta e camaradagem.` },
+  { name: "Shota Aizawa (Eraser Head)", role: "Professor", class: "Herói Profissional / Educador", quirk: "Erasure", img: "Imagens/aizawa.jpg", bio: `Aizawa, conhecido como Eraser Head, é um professor severo mas eficaz.` },
+  { name: "Tomura Shigaraki", role: "Vilão / Líder", class: "Vilão", quirk: "Decay", img: "Imagens/shigaraki.jpg", bio: `Tomura Shigaraki é um antagonista cuja visão anárquica e poder destrutivo representam um desafio existencial ao sistema dos heróis.` },
+  { name: "Hawks (Keigo Takami)", role: "Herói Profissional", class: "Herói", quirk: "Feather (Plumagem controlável)", img: "Imagens/hawks.jpg", bio: `Hawks é um herói de mente rápida e postura descontraída, usando suas penas controláveis para reconhecimento, resgate e combate.` }
+];
+
+const DB = { onepiece, aot, bnha };
+
+const animeSelect = document.getElementById('animeSelect');
+const searchInput = document.getElementById('searchInput');
+const clearBtn = document.getElementById('clearBtn');
+const cardsGrid = document.getElementById('cardsGrid');
+const countLabel = document.getElementById('countLabel');
+
+const detailModal = document.getElementById('detailModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalName = document.getElementById('modalName');
+const modalRole = document.getElementById('modalRole');
+const attrLabel1 = document.getElementById('attrLabel1');
+const attrValue1 = document.getElementById('attrValue1');
+const attrLabel2 = document.getElementById('attrLabel2');
+const attrValue2 = document.getElementById('attrValue2');
+const modalBio = document.getElementById('modalBio');
+const modalImg = document.getElementById('modalImg');
+
+function escapeHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function updateCount(total, visible){
+  countLabel.textContent = `${visible} / ${total}`;
+}
+
+function renderGridFor(key){
+  const list = DB[key] || [];
+  cardsGrid.innerHTML = '';
+  if(list.length === 0){
+    cardsGrid.innerHTML = `<div class="col-12"><div class="alert alert-warning text-dark">Nenhum personagem encontrado para este anime.</div></div>`;
+    updateCount(0,0);
+    return;
+  }
+  list.forEach(p => {
+    const col = document.createElement('div');
+    col.className = 'col-12 col-sm-6 col-md-4 col-lg-3';
+    let dataAttrs = `data-name="${escapeHtml(p.name)}" data-role="${escapeHtml(p.role)}" data-img="${escapeHtml(p.img)}" data-bio="${escapeHtml(p.bio)}"`;
+    if(key === 'onepiece'){
+      dataAttrs += ` data-bounty="${escapeHtml(p.bounty || '—')}" data-status="${escapeHtml(p.status || '—')}"`;
+    } else if(key === 'aot'){
+      dataAttrs += ` data-nation="${escapeHtml(p.nation || '—')}" data-func="${escapeHtml(p.role_desc || p.role || '—')}"`;
+    } else if(key === 'bnha'){
+      dataAttrs += ` data-class="${escapeHtml(p.class || '—')}" data-quirk="${escapeHtml(p.quirk || '—')}"`;
+    }
+    col.innerHTML = `
+      <div class="card" tabindex="0" ${dataAttrs} data-bs-toggle="modal" data-bs-target="#detailModal">
+        <img src="${p.img}" class="card-img-top" alt="${escapeHtml(p.name)}">
+        <div class="card-body">
+          <h5 class="card-title">${p.name}</h5>
+          <p class="card-text">${p.role}</p>
+        </div>
+      </div>
+    `;
+    cardsGrid.appendChild(col);
+  });
+  updateCount(list.length, list.length);
+}
+
+function applySearch(){
+  const q = searchInput.value.trim().toLowerCase();
+  const cards = Array.from(cardsGrid.querySelectorAll('.card'));
+  let total = cards.length;
+  let visible = 0;
+  cards.forEach(card => {
+    const name = (card.dataset.name || '').toLowerCase();
+    const role = (card.dataset.role || '').toLowerCase();
+    const extra = (card.dataset.status || card.dataset.func || card.dataset.quirk || '').toLowerCase();
+    const match = (name.includes(q) || role.includes(q) || extra.includes(q));
+    card.parentElement.style.display = match ? '' : 'none';
+    if(match) visible++;
+  });
+  updateCount(total, visible);
+}
+
+detailModal.addEventListener('show.bs.modal', (ev)=>{
+  const trigger = ev.relatedTarget;
+  if(!trigger) return;
+  const animeKey = animeSelect.value;
+  modalTitle.textContent = trigger.dataset.name;
+  modalName.textContent = trigger.dataset.name;
+  modalRole.textContent = trigger.dataset.role || '';
+  modalBio.textContent = trigger.dataset.bio || '';
+  if(animeKey === 'onepiece'){
+    attrLabel1.textContent = 'Recompensa:';
+    attrValue1.textContent = trigger.dataset.bounty || '—';
+    attrLabel2.textContent = 'Status:';
+    attrValue2.textContent = trigger.dataset.status || '—';
+  } else if(animeKey === 'aot'){
+    attrLabel1.textContent = 'Origem:';
+    attrValue1.textContent = trigger.dataset.nation || '—';
+    attrLabel2.textContent = 'Função:';
+    attrValue2.textContent = trigger.dataset.func || trigger.dataset.role || '—';
+  } else if(animeKey === 'bnha'){
+    attrLabel1.textContent = 'Classe:';
+    attrValue1.textContent = trigger.dataset.class || '—';
+    attrLabel2.textContent = 'Poder (Quirk):';
+    attrValue2.textContent = trigger.dataset.quirk || '—';
+  } else {
+    attrLabel1.textContent = '';
+    attrValue1.textContent = '';
+    attrLabel2.textContent = '';
+    attrValue2.textContent = '';
+  }
+  modalImg.src = trigger.dataset.img || '';
+});
+
+animeSelect.addEventListener('change', ()=>{
+  const key = animeSelect.value;
+  renderGridFor(key);
+  searchInput.value = '';
+  updateCount(DB[key].length, DB[key].length);
+});
+
+searchInput.addEventListener('input', applySearch);
+clearBtn.addEventListener('click', ()=>{
+  searchInput.value = '';
+  applySearch();
+  searchInput.focus();
+});
+
+renderGridFor('onepiece');
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    const el = document.activeElement;
+    if(el && el.classList && el.classList.contains('card')){
+      el.click();
+    }
+  }
+});
+</script>
+</body>
+</html>
